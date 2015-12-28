@@ -22,10 +22,10 @@
     "via",
     "x-forwarded-for"
   ],
-  "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
+  "author": "hcnode@gmail.com",
   "repository": {
     "type": "git",
-    "url": "git://github.com/TooTallNate/proxy.git"
+    "url": "git://github.com/hcnode/alex-proxy.git"
   },
   "license": "MIT",
   "dependencies": {
