@@ -1,0 +1,37 @@
+{
+  "name": "proxy",
+  "description": "An HTTP proxy written with Node.js (think Squid)",
+  "main": "proxy.js",
+  "authors": [
+    "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "http",
+    "https",
+    "proxy",
+    "connect",
+    "tunnel",
+    "squid",
+    "privoxy",
+    "apache",
+    "mod_proxy",
+    "via",
+    "x-forwarded-for"
+  ],
+  "homepage": "https://github.com/TooTallNate/proxy",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.8",
+    "font-awesome": "font-awsome#~4.5.0",
+    "bootstrap": "~3.3.6",
+    "jquery-jsonview": "~1.2.3"
+  }
+}

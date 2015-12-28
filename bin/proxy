@@ -2,6 +2,8 @@
 
 process.title = 'proxy';
 
+var config = require("config");
+
 /**
  * Module dependencies.
  */
@@ -11,7 +13,7 @@ var version = require('../package.json').version;
 
 program
   .version(version)
-  .option('-p, --port <n>', 'TCP port number to bind to. Defaults to 3128', 3128, Number)
+  .option('-p, --port <n>', 'TCP port number to bind to. Defaults to 3128', config.get("port"), Number)
   .option('-a, --authenticate <command>', '"authenticate" command to run when "Proxy-Authorization" is given')
   .parse(process.argv);
 
