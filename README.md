@@ -1,127 +1,31 @@
-proxy
-=====
-### An HTTP proxy written with Node.js (think Squid)
-[![Build Status](https://travis-ci.org/TooTallNate/proxy.svg?branch=master)](https://travis-ci.org/TooTallNate/proxy)
+Alex-proxy is an HTTP proxy / HTTP monitor base on and inspiring by [TooTallNate/proxy](https://github.com/TooTallNate/proxy)
 
-This module provides standard "HTTP proxy" logic. You can script your own server
-using the `proxy` server API. Be sure to take a look at the "Examples" section
-below.
+# Features
+ 
+ * Http server proxy base on [TooTallNate/proxy](https://github.com/TooTallNate/proxy)
+ * Provide web base http monitor, enables a developer to view all of the HTTP traffic between their machine and the Internet
+ * Provide Body and header viewer so far, more functions are on processing
+ * You can sharing your http traffic to others
+ * Or you can bind your ip to others by typing the ip or scanning the qrcode
+ 
+# Usages
 
-There is also a companion `proxy(1)` CLI tool, which spawns an HTTP(s) proxy
-server with the specified options.
+ * Assume you have install bower, if not install first `npm install bower -g`
+ * `git clone https://github.com/hcnode/alex-proxy`
+ * `cd alex-proxy`
+ * `npm install`
+ * `vi ./config/default.json` edit hostname to your server's ip or hostname 
+ * `npm start`
+ * set pc/device's proxy with server-ip:8008
+ * visit http://server-ip:8008 to view the http traffic
+ * visit http://server-ip:8008?ip=other_device_ip to view the particular device's traffic by binding ip
+ 
+# Binding ip
+ 
+ there are two ways to bind other ip to your pc/device, then the binded ip's pc can view your pc/device's http traffic
+ 
+ * visit http://server-ip:8008 in your pc/device which you want to bind, click "管理ip绑定", type the ip you want to bind in the input, then enter.
+ * visit http://server-ip:8008 in your pc/device which you want to be binded, click "显示二维码", then use the binded pc/device to scan the qrcode
+ 
+# Screenshots 
 
-You could think of `proxy(1)` as similar to some of the other popular open
-source HTTP proxy software:
-
- * [Squid][]
- * [Privoxy][]
- * [Apache][] with [`mod_proxy`][mod_proxy]
- * [More…](http://wikipedia.org/wiki/Proxy_server#Web_proxy_servers)
-
-
-Installation
-------------
-
-Install with `npm`:
-
-``` bash
-$ npm install proxy
-```
-
-If you would like to have the `proxy(1)` CLI program in your `$PATH`, then
-install "globally":
-
-``` bash
-$ npm install -g proxy
-```
-
-
-Examples
---------
-
-#### Basic HTTP(s) proxy server
-
-A basic HTTP(s) server with all the default options. All requests are allowed.
-CONNECT HTTP method works as well.
-
-``` js
-var http = require('http');
-var setup = require('proxy');
-
-var server = setup(http.createServer());
-server.listen(3128, function () {
-  var port = server.address().port;
-  console.log('HTTP(s) proxy server listening on port %d', port);
-});
-```
-
-
-CLI Tool Examples
------------------
-
-The `proxy(1)` CLI tool can be used to spawn HTTP(s) proxy server instances with
-various options.
-
-#### Port to bind to
-
-Pass the `-p`/`--port` option to with a port number to specify a TCP port to
-bind to. Defaults to __3128__ if none is specified.
-
-``` bash
-$ proxy --port 8080
-```
-
-#### Custom `Proxy-Authenticate` command
-
-Pass the `-a`/`--authenticate` switch with a command to execute when the client
-`Proxy-Authorization` header is given. This command determines whether or not the
-request is authorized based on the "exit code" of the command.
-
-The relevant request authentication information is passed in as
-`PROXY_AUTH_USERNAME`, `PROXY_AUTH_PASSWORD` and `PROXY_AUTH_SCHEME` environment
-variables.
-
-For example, to authorize "Basic" authentication with username "foo" and
-password "bar":
-
-``` bash
-$ proxy --authenticate 'if \
-    [ "$PROXY_AUTH_USERNAME" = "foo" ] && \
-    [ "$PROXY_AUTH_PASSWORD" = "bar" ]; \
-      then exit 0; \
-    fi; \
-    exit 1;'
-```
-
-
-License
--------
-
-(The MIT License)
-
-Copyright (c) 2013 Nathan Rajlich &lt;nathan@tootallnate.net&gt;
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-[Squid]: http://www.squid-cache.org/
-[Privoxy]: http://www.privoxy.org/
-[Apache]: http://www.apache.org/
-[mod_proxy]: http://httpd.apache.org/docs/current/mod/mod_proxy.html
