@@ -29,3 +29,6 @@ Alex-proxy is an HTTP proxy / HTTP monitor base on and inspiring by [TooTallNate
  
 # Screenshots 
 
+![screenshot1](https://raw.githubusercontent.com/hcnode/alex-proxy/master/screenshot/screenshot1.png)
+![screenshot2](https://raw.githubusercontent.com/hcnode/alex-proxy/master/screenshot/screenshot2.png)
+![screenshot3](https://raw.githubusercontent.com/hcnode/alex-proxy/master/screenshot/screenshot3.png)
