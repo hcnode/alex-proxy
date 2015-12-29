@@ -54,6 +54,7 @@
             <th>Time</th>
             <th>Ip</th>
             <th>Method</th>
+            <th>Status</th>
             <th>Url</th>
             <th style="width:250px"></th>
         </tr>
@@ -63,6 +64,7 @@
             <td>{{ item.time }}</td>
             <td>{{ item.ip }}</td>
             <td>{{ item.method }}</td>
+            <td>{{ item.statusCode }}</td>
             <td style="word-break:break-all;"><a href="{{ item.url }}" target="_blank">{{ item.url }}</a></td>
             <td>
                 <button class="btn" ng-click="showBody(item)" data-toggle="modal" data-target=".json-body">Body</button>

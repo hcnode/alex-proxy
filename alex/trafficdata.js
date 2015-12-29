@@ -82,6 +82,7 @@ module.exports = function (req, res, proxyRes) {
 			url: req.url,
 			time: moment().format("HH:mm:ss"),
 			ip: clientIp,
+			statusCode : proxyRes.statusCode,
 			id : uuid.v1()
 		});
 	});
