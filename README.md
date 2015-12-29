@@ -17,7 +17,7 @@ Alex-proxy is an HTTP proxy / HTTP monitor base on and inspiring by [TooTallNate
  * `vi ./config/default.json` edit hostname to your server's ip or hostname 
  * `npm start`
  * set pc/device's proxy with server-ip:8008
- * visit http://server-ip:8008 to view the http traffic
+ * visit http://server-ip:8008 to view the local http traffic
  * visit http://server-ip:8008?ip=other_device_ip to view the particular device's traffic by binding ip
  
 # Binding ip

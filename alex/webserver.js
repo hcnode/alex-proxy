@@ -14,6 +14,8 @@ var util = require("./util");
 
 var ipRegexp = util.getIpRegExp();
 
+var addBindIp = {};
+
 function getParam(query, param) {
 	var params = query.split("&");
 	for (var i = 0; i < params.length; i++) {
@@ -84,8 +86,6 @@ function getLog(req, res) {
 		parsed.headers = {
 			apikey : "0585d369197034fe566d98ab2742bb30"
 		};
-		//console.log(parsed);
-
 		var qrReq = http.request(parsed);
 
 		qrReq.on('response', function (qrRes) {
@@ -114,6 +114,7 @@ function getLog(req, res) {
 				if(!includes(json[clientIp], ip)){
 					json[clientIp].push(ip);
 				}
+				addBindIp[ip] = clientIp;
 			}else if(action == "remove" && ip){
 				json[clientIp].forEach(function (item, index) {
 					if(item == ip){
@@ -141,7 +142,14 @@ function getLog(req, res) {
 		var data = id ? getCacheDataById(id) :
 			isBindIp  ? (getCacheData(ip || clientIp, start) || []) : [];
 		res.writeHead(200, {"Content-Type": "application/json"})
-		res.end(JSON.stringify(data));
+		var result = {
+			data : data
+		};
+		if(addBindIp[clientIp]){
+			result.bindIp = addBindIp[clientIp];
+			delete addBindIp[clientIp];
+		}
+		res.end(JSON.stringify(result));
 		return true;
 	} else if (pathname == "/") {
 		res.writeHead(200, {"Content-Type": "text/html"})

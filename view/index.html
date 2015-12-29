@@ -17,7 +17,9 @@
 <div class="container" style="margin-top: 10px;">
     <div class="row alert alert-info " role="alert">
     <div class="col-xs-6">
-        <h3>http代理，以及抓包工具</h3>
+        <h3>Http代理、监控工具
+            &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/hcnode/alex-proxy" target="_blank"><i class="fa fa-github fa-2x"></i></a>
+        </h3>
         使用方法：<br>
         1.将手机或者电脑网络连接内网<br>
         2.设置网络http代理服务器：$serverIp$:$port$<br>
@@ -237,7 +239,8 @@
                         clearInterval(interval);
                     }
                     $http.get("/data?start=" + $scope.start + "&ip=" + $scope.ip + "&id=" + $scope.id).then(function (res) {
-                        var data = res.data;
+                        var data = res.data.data;
+                        var bindIp = res.data.bindIp;
                         $scope.start += data.length;
                         var reverseData = data.reverse();
                         $scope.data = reverseData.concat($scope.data);
@@ -245,6 +248,9 @@
                         if($scope.id){
                             $scope.showBody(reverseData[0]);
                             $(".json-body").modal('show');
+                        }
+                        if(bindIp){
+                            $scope.ip = bindIp;
                         }
                     });
                 }, 1000);
