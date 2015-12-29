@@ -67,11 +67,27 @@
             <td>
                 <button class="btn" ng-click="showBody(item)" data-toggle="modal" data-target=".json-body">Body</button>
                 <button class="btn" ng-click="showHeader(item)" data-toggle="modal" data-target=".json-header">Headers</button>
-                <button class="btn" ng-click="share(item)">Share</button>
+                <button class="btn" ng-click="share(item)" data-toggle="modal" data-target=".share">Share</button>
             </td>
         </tr>
         </tbody>
     </table>
+    <!-- Modal share -->
+    <div class="modal fade share" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" style="width:1200px;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Share</h4>
+                </div>
+                <div class="modal-body" id="share-content">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal body -->
     <div class="modal fade json-body" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" style="width:1200px;" role="document">
@@ -169,7 +185,7 @@
         return true;
     }
     angular.module('app', [])
-            .controller('ctrl', function($scope, $http) {
+            .controller('ctrl', ["$scope", "$http", "$compile",  function($scope, $http, $compile) {
                 $scope.ip = "";
                 $scope.id = "";
                 $scope.filter = {
@@ -206,17 +222,18 @@
                                     switch(key){
                                         case "contentType" :
                                             var type = $scope.filter[key];
-                                                switch (type){
-                                                    case "json":
-                                                        isMatch = getContentType(item).isJson() && isMatch;
-                                                        break;
-                                                    case "image":
-                                                        isMatch = getContentType(item).isImage() && isMatch;
-                                                        break;
-                                                    case "html":
-                                                        isMatch = getContentType(item).isHtml() && isMatch;
-                                                        break;
-                                                }
+                                            var contentType = getContentType(item);
+                                            switch (type){
+                                                case "json":
+                                                    isMatch = contentType.isJson() && isMatch;
+                                                    break;
+                                                case "image":
+                                                    isMatch = contentType.isImage() && isMatch;
+                                                    break;
+                                                case "html":
+                                                    isMatch = contentType.isHtml() && isMatch;
+                                                    break;
+                                            }
                                             break;
                                         case "key" :
                                             isMatch = new RegExp($scope.filter[key]).test(item.url) && isMatch;
@@ -254,6 +271,7 @@
                         }
                     });
                 }, 1000);
+
                 $scope.showBody = function (item) {
                     $("#json-content").html("");
                     var contentType = getContentType(item);
@@ -269,7 +287,6 @@
                     }else{
                         $("#json-content").html('<pre>' + htmlEncode(item.body) + '</pre>');
                     }
-
                 }
                 $scope.showHeader = function (item) {
                     $("#header-req").html("");
@@ -280,7 +297,7 @@
                 $scope.share = function (item) {
                     var url = location.href;
                     url += (url.indexOf("?") > -1 ? "&" : "?") + "id=" + item.id;
-                    window.open(url)
+                    $("#share-content").append($compile('<a href="'+ url +'" target="_blank">'+ url +'</a>')($scope));
                 }
                 $scope.addBindIp = function(event){
                     if(event.keyCode == 13){
@@ -306,6 +323,6 @@
                         }
                     });
                 }
-            });
+            }]);
 </script>
 </html>
