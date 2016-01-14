@@ -14,7 +14,6 @@ Alex-proxy is an HTTP proxy / HTTP monitor base on and inspiring by [TooTallNate
  * `git clone https://github.com/hcnode/alex-proxy`
  * `cd alex-proxy`
  * `npm install`
- * `vi ./config/default.json` edit hostname to your server's ip or hostname 
  * `npm start`
  * set pc/device's proxy with server-ip:8008
  * visit http://server-ip:8008 to view the local http traffic
@@ -25,7 +24,7 @@ Alex-proxy is an HTTP proxy / HTTP monitor base on and inspiring by [TooTallNate
  there are two ways to bind other ip to your pc/device, then the binded ip's pc can view your pc/device's http traffic
  
  * visit http://server-ip:8008 in your pc/device which you want to bind, click "管理ip绑定", type the ip you want to bind in the input, then enter.
- * visit http://server-ip:8008 in your pc/device which you want to be binded, click "显示二维码", then use the binded pc/device to scan the qrcode
+ * visit http://server-ip:8008 in your pc/device which you want to be binded, then use the binded pc/device to scan the qrcode which shown in page
  
 # Screenshots 
 
