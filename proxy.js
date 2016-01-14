@@ -180,10 +180,14 @@ function onrequest(req, res) {
 		var gotResponse = false;
 		var proxyReq = http.request(parsed);
 		debug.proxyRequest('%s %s HTTP/1.1 ', proxyReq.method, proxyReq.path);
+		var postBody = [];
+		req.on('data', function(chunk) {
+			postBody.push(chunk);
+		});
 
 		proxyReq.on('response', function (proxyRes) {
 			// inject for saving traffic data
-			trafficdata(req, res, proxyRes);
+			trafficdata(req, res, proxyRes, postBody);
 
 			debug.proxyResponse('HTTP/1.1 %s', proxyRes.statusCode);
 			gotResponse = true;

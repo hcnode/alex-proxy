@@ -39,7 +39,7 @@ function isImage(res) {
 	return result;
 }
 
-module.exports = function (req, res, proxyRes) {
+module.exports = function (req, res, proxyRes, postBody) {
 	var cacheData = util.getCacheData();
 	var clientIp = util.getIp(req.connection.remoteAddress);
 	cacheData[clientIp] = cacheData[clientIp] || [];
@@ -51,6 +51,7 @@ module.exports = function (req, res, proxyRes) {
 	} else {
 		output = proxyRes;
 	}
+
 	output.on('data', function (chunk) {
 		bufferHelper.concat(chunk);
 	});
@@ -83,7 +84,8 @@ module.exports = function (req, res, proxyRes) {
 			time: moment().format("HH:mm:ss"),
 			ip: clientIp,
 			statusCode : proxyRes.statusCode,
-			id : uuid.v1()
+			id : uuid.v1(),
+			postBody : postBody.join("")
 		});
 	});
 }

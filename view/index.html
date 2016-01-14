@@ -7,6 +7,7 @@
     <script src="/bower_components/angular/angular.min.js"></script>
     <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/bower_components/jquery-jsonview/dist/jquery.jsonview.js"></script>
+    <script src="/bower_components/qrcodejs/qrcode.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/font-awesome/css/font-awesome.min.css" />
@@ -16,27 +17,28 @@
 <body ng-app="app" ng-controller="ctrl">{{keyCode}}
 <div class="container" style="margin-top: 10px;">
     <div class="row alert alert-info " role="alert">
-    <div class="col-xs-6">
+    <div class="col-xs-9">
         <h3>Http代理、监控工具
             &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/hcnode/alex-proxy" target="_blank"><i class="fa fa-github fa-2x"></i></a>
         </h3>
         使用方法：<br>
         1.将手机或者电脑网络连接内网<br>
         2.设置网络http代理服务器：$serverIp$:$port$<br>
-        3.访问http://$hostname$:$port$/?ip=查看请求的ip，为空时为本机ip<br>
-        （查看非本机ip需要先在该ip设备进入本页面绑定可以查看的ip的权限，或者扫描本页面二维码）
+        3.访问http://$hostname$:$port$/#ip=查看请求的ip，为空时为本机ip, 或者在下面输入框输入ip<br>
+        （查看非本机ip默认是没有权限, 可以直接用该设备扫描右边的二维码获取该设备权限）
     </div>
-    <div class="col-xs-3">
-        <image src="{{ qrCode }}" ng-if="qrCode" style="width: 150px;height: 150px" />
-    </div>
-    <div class="col-xs-3" id="bindIp" style="display: none;">
+    <div class="col-xs-3 hide" id="bindIp" style="display: none;">
         添加绑定：<input ng-model="bindNewIp" ng-keydown="addBindIp($event)">
         <ul class="list-group" style="margin-top: 5px">
             <li class="list-group-item" ng-repeat="item in bindIps">{{ item }}&nbsp;<i class="fa fa-remove" ng-click="removeBindIp(item)"></i></li>
         </ul>
     </div>
+        <div class="col-xs-3" >
+            <div id="qrcode" ></div>
+        </div>
     </div>
     查看请求的ip: &nbsp;<input ng-model="ip" placeholder="为空时为本机ip">
+    &nbsp;&nbsp;<button ng-click="clean()" class="btn btn-default btn-xs">清空</button>
     &nbsp;&nbsp;Filter:
     &nbsp;&nbsp;content-type: <select ng-model="filter.contentType" ng-change="createFilterData()">
         <option value="all">all</option>
@@ -45,9 +47,9 @@
         <option value="html">html</option>
     </select>
     &nbsp;&nbsp;关键字: <input ng-model="filter.key" ng-change="createFilterData()">
-    &nbsp;&nbsp;Ip绑定:
-    &nbsp;&nbsp;<button onclick="$('#bindIp').toggle()">管理ip绑定</button>
-    &nbsp;&nbsp;<button ng-click="getQr()">显示二维码</button>
+    <!--&nbsp;&nbsp;Ip绑定:
+    &nbsp;&nbsp;<button onclick="$('#bindIp').toggle()">管理ip绑定</button>-->
+    <!--&nbsp;&nbsp;<button ng-click="getQr()">显示二维码</button>-->
     <table class="table ">
         <thead>
         <tr>
@@ -56,7 +58,7 @@
             <th>Method</th>
             <th>Status</th>
             <th>Url</th>
-            <th style="width:250px"></th>
+            <th style="width:270px"></th>
         </tr>
         </thead>
         <tbody>
@@ -67,22 +69,33 @@
             <td>{{ item.statusCode }}</td>
             <td style="word-break:break-all;"><a href="{{ item.url }}" target="_blank">{{ item.url }}</a></td>
             <td>
-                <button class="btn" ng-click="showBody(item)" data-toggle="modal" data-target=".json-body">Body</button>
-                <button class="btn" ng-click="showHeader(item)" data-toggle="modal" data-target=".json-header">Headers</button>
-                <button class="btn" ng-click="share(item)" data-toggle="modal" data-target=".share">Share</button>
+                <div class="btn-group" role="group" aria-label="...">
+                    <button class="btn btn-default" ng-click="showBody(item)" data-toggle="modal" data-target=".json-body">Body</button>
+                    <button class="btn btn-default" ng-click="showHeader(item)" data-toggle="modal" data-target=".json-header">Headers</button>
+
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            More
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            <li><a href="#" ng-click="share(item)" data-toggle="modal" data-target=".common">Share</a></li>
+                        </ul>
+                    </div>
+                </div>
             </td>
         </tr>
         </tbody>
     </table>
-    <!-- Modal share -->
-    <div class="modal fade share" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <!-- Modal common -->
+    <div class="modal fade common" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" style="width:1200px;" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Share</h4>
+                    <h4 class="modal-title"></h4>
                 </div>
-                <div class="modal-body" id="share-content">
+                <div class="modal-body" id="common-content">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -99,6 +112,20 @@
                     <h4 class="modal-title" id="myModalLabel">Body</h4>
                 </div>
                 <div class="modal-body" id="json-content">
+                    <ul id="bodyTabs" class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#body-req" id="reqBody-tab" role="tab"
+                               data-toggle="tab" aria-controls="body-req"
+                               aria-expanded="true">Request</a></li>
+                        <li role="presentation" class="">
+                            <a href="#body-res" role="tab" id="resBody-tab"
+                               data-toggle="tab" aria-controls="body-res"
+                               aria-expanded="false">Response</a></li>
+                    </ul>
+                    <div id="bodyContent" class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in" id="body-req" aria-labelledby="body-tab"></div>
+                        <div role="tabpanel" class="tab-pane fade" id="body-res" aria-labelledby="body-tab"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -186,6 +213,28 @@
         }
         return true;
     }
+
+    function reqContentTypeIsJson(item) {
+        var contentType = item.reqHeaders && item.reqHeaders["content-type"];
+        if(contentType && /json/.test(contentType)){
+            return true;
+        }
+    }
+
+    function beautifulBody(body) {
+        var params = body.split(/&/);
+        var result = {};
+        for(var i=0;i<params.length;i++){
+            if(params[i]){
+                var pair = params[i].split("=");
+                result[pair[0]] = pair[1];
+            }
+        }
+        return result;
+    }
+    function getHashIp() {
+        return /#ip=((\d{1,3}\.){3}\d{1,3})/.test(location.hash) && RegExp.$1;
+    }
     angular.module('app', [])
             .controller('ctrl', ["$scope", "$http", "$compile",  function($scope, $http, $compile) {
                 $scope.ip = "";
@@ -196,9 +245,9 @@
                 $scope.bindIps = [];
                 $scope.localIp = "$clientIp$";
                 var currentIp;
-                if(/[\&\?]ip=((\d{1,3}\.){3}\d{1,3})/.test(location.search)){
-                    var ip = RegExp.$1;
-                    $scope.ip = ip;
+                var hashIp = getHashIp();
+                if(hashIp){
+                    $scope.ip = hashIp;
                 }
                 if(/[\&\?]id=(.+?)($|&)/.test(location.search)){
                     $scope.id = RegExp.$1;
@@ -257,6 +306,12 @@
                     if($scope.id){
                         clearInterval(interval);
                     }
+                    if($scope.ip){
+                        var hashIp = getHashIp();
+                        if(!hashIp || hashIp != $scope.ip){
+                            location.hash = "#ip=" + $scope.ip;
+                        }
+                    }
                     $http.get("/data?start=" + $scope.start + "&ip=" + $scope.ip + "&id=" + $scope.id).then(function (res) {
                         var data = res.data.data;
                         var bindIp = res.data.bindIp;
@@ -275,20 +330,28 @@
                 }, 1000);
 
                 $scope.showBody = function (item) {
-                    $("#json-content").html("");
+                    $("#body-res").html("");
                     var contentType = getContentType(item);
                     var type = contentType.getType();
                     if(type == "json"){
                         try {
-                            $("#json-content").JSONView(item.body);
+                            $("#body-res").JSONView(item.body);
                         } catch (e) {
-                            $("#json-content").html(item.body);
+                            $("#body-res").html(item.body);
                         }
                     }else if(type == "image"){
-                        $("#json-content").html('<image src="'+ item.url +'">');
+                        $("#body-res").html('<image src="'+ item.url +'">');
                     }else{
-                        $("#json-content").html('<pre>' + htmlEncode(item.body) + '</pre>');
+                        $("#body-res").html('<pre>' + htmlEncode(item.body) + '</pre>');
                     }
+
+                    var body = item.postBody;
+                    if(reqContentTypeIsJson(item)){
+                        body = JSON.parse(body);
+                    }else{
+                        body = beautifulBody(body);
+                    }
+                    $("#body-req").JSONView(body);
                 }
                 $scope.showHeader = function (item) {
                     $("#header-req").html("");
@@ -297,9 +360,8 @@
                     $("#header-req").JSONView(beautifulCookie(item.reqHeaders));
                 }
                 $scope.share = function (item) {
-                    var url = location.href;
-                    url += (url.indexOf("?") > -1 ? "&" : "?") + "id=" + item.id;
-                    $("#share-content").append($compile('<a href="'+ url +'" target="_blank">'+ url +'</a>')($scope));
+                    url = location.origin + "?id=" + item.id;
+                    $("#common-content").html($compile('<a href="'+ url +'" target="_blank">'+ url +'</a>')($scope));
                 }
                 $scope.addBindIp = function(event){
                     if(event.keyCode == 13){
@@ -317,14 +379,20 @@
                 }
                 $scope.getQr = function () {
                     var addUrl = "http://"+ location.hostname +":"+ location.port +"/bindIp?action=add&ip=" + $scope.localIp;
-                    var url = "/getQr?url="+ encodeURIComponent(addUrl);
-                    $http.get(url).then(function (res) {
-                        var data = res.data;
-                        if(data.url){
-                            $scope.qrCode = data.url;
-                        }
+                    new QRCode(document.getElementById("qrcode"), {
+                        text: addUrl,
+                        width: 128,
+                        height: 128,
+                        correctLevel : QRCode.CorrectLevel.H
+                    })
+                }
+                $scope.clean = function () {
+                    $http.get('/cleanCache?ip=' + $scope.ip).then(function (res) {
+                        $scope.data = [];
                     });
                 }
+
+                $scope.getQr();
             }]);
 </script>
 </html>

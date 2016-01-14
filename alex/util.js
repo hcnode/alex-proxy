@@ -7,7 +7,7 @@ module.exports = {
 		return /(\d{1,3}\.){3}\d{1,3}/;
 	},
 	getIp : function(ip) {
-		return ip.match(this.getIpRegExp())[0];
+		return (ip.match(this.getIpRegExp()) || ["127.0.0.1"])[0];
 	},
 	getCacheData : function () {
 		return cacheData;

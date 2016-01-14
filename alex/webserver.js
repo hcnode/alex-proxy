@@ -77,33 +77,7 @@ function getLog(req, res) {
 	var pathname = urlParse.pathname;
 	var query = urlParse.query;
 	var clientIp = util.getIp(req.connection.remoteAddress);
-	if (pathname == "/getQr") {
-		var qrData = getParam(query, "url");
-		var qrUrl = "http://apis.baidu.com/3023/qr/qrcode?size=8&qr="+ (qrData);
-		console.log(qrUrl)
-		var parsed = url.parse(qrUrl);
-		parsed.method = "get";
-		parsed.headers = {
-			apikey : "0585d369197034fe566d98ab2742bb30"
-		};
-		var qrReq = http.request(parsed);
-
-		qrReq.on('response', function (qrRes) {
-			var data = "";
-			qrRes.on('data', function (chunk) {
-				data += chunk.toString();
-			});
-			qrRes.on('end', function () {
-				if(data){
-					res.writeHead(200, {"Content-Type": "application/json"})
-					res.end(data);
-				}
-			});
-		});
-		qrReq.end();
-
-		return true;
-	}else if (pathname == "/bindIp") {
+	if (pathname == "/bindIp") {
 		var ip = getParam(query, "ip");
 		var action = getParam(query, "action");
 		var ipBindFile = __dirname + "/../data/ipBind.json";
@@ -159,6 +133,20 @@ function getLog(req, res) {
 		res.end(html.replace(/\$serverIp\$/gi, serverIp).replace(/\$clientIp\$/gi, clientIp)
 			.replace(/\$hostname\$/gi, localHostname).replace(/\$port\$/gi, localPort));
 		return true;
+	} else if(pathname == "/cleanCache"){
+		var ip = getParam(query, "ip");
+		var isBindIp = ip ? checkBindIp(clientIp, ip) : true;
+		res.writeHead(200, {"Content-Type": "application/json"})
+		if(isBindIp) {
+			var cleanIp = ip || clientIp;
+			var cacheData = util.getCacheData();
+			if (cacheData && cacheData[cleanIp]) {
+				delete cacheData[cleanIp];
+			}
+			res.end(JSON.stringify({code:200}));
+		}else{
+			res.end(JSON.stringify({code:401}));
+		}
 	} else {
 		return false;
 	}
@@ -176,6 +164,10 @@ function getVender(req, res) {
 	}
 }
 module.exports = function (req, res) {
+	if(!localHostname) {
+		var serverIp = util.getIp(require("ip").address());
+		localHostname = serverIp;
+	}
 	var urlParse = url.parse(req.url);
 	var port = urlParse.port;
 	if (!urlParse.hostname || (localHostname && urlParse.hostname == localHostname && localPort && localPort == port)) {
