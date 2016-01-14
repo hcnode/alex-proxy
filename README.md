@@ -1,10 +1,10 @@
-Alex-proxy is an HTTP proxy / HTTP monitor base on and inspiring by [TooTallNate/proxy](https://github.com/TooTallNate/proxy)
+Alex-proxy is an HTTP proxy / HTTP monitor base on and inspired by [TooTallNate/proxy](https://github.com/TooTallNate/proxy)
 
 # Features
  
  * Http server proxy base on [TooTallNate/proxy](https://github.com/TooTallNate/proxy)
  * Provide web base http monitor, enables a developer to view all of the HTTP traffic between their machine and the Internet
- * Provide Body and header viewer so far, more functions are on processing
+ * Provide Body and header viewer.
  * You can sharing your http traffic to others
  * Or you can bind your ip to others by typing the ip or scanning the qrcode
  
