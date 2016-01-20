@@ -12,20 +12,25 @@
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/jquery-jsonview/dist/jquery.jsonview.css" />
+    <style type="text/css">
+        .padding5 {
+            padding: 5px;
+        }
+    </style>
 
 </head>
-<body ng-app="app" ng-controller="ctrl">{{keyCode}}
+<body ng-app="app" ng-controller="ctrl">
 <div class="container" style="margin-top: 10px;">
     <div class="row alert alert-info " role="alert">
     <div class="col-xs-9">
-        <h3>Http代理、监控工具
+        <h3>移动设备Http代理/监控工具
             &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/hcnode/alex-proxy" target="_blank"><i class="fa fa-github fa-2x"></i></a>
         </h3>
         使用方法：<br>
-        1.将手机或者电脑网络连接内网<br>
-        2.设置网络http代理服务器：$serverIp$:$port$<br>
-        3.访问http://$hostname$:$port$/#ip=查看请求的ip，为空时为本机ip, 或者在下面输入框输入ip<br>
-        （查看非本机ip默认是没有权限, 可以直接用该设备扫描右边的二维码获取该设备权限）
+        1.将手机网络连接和电脑同一个内网<br>
+        2.设置手机网络http代理服务器：$serverIp$:$port$<br>
+        3.电脑访问http://$hostname$:$port$/#ip=手机的ip，或者在下面输入框输入ip<br>
+        （查看非本机ip默认是没有权限, 可以使用该手机扫描右边的二维码从而电脑获取该设备http监控权限）
     </div>
     <div class="col-xs-3 hide" id="bindIp" style="display: none;">
         添加绑定：<input ng-model="bindNewIp" ng-keydown="addBindIp($event)">
@@ -34,7 +39,7 @@
         </ul>
     </div>
         <div class="col-xs-3" >
-            <div id="qrcode" ></div>
+            <div id="qrcode"></div>
         </div>
     </div>
     查看请求的ip: &nbsp;<input ng-model="ip" placeholder="为空时为本机ip">
@@ -42,14 +47,11 @@
     &nbsp;&nbsp;Filter:
     &nbsp;&nbsp;content-type: <select ng-model="filter.contentType" ng-change="createFilterData()">
         <option value="all">all</option>
-        <option value="json">json/js</option>
+        <option value="json">json</option>
         <option value="image">image</option>
         <option value="html">html</option>
     </select>
     &nbsp;&nbsp;关键字: <input ng-model="filter.key" ng-change="createFilterData()">
-    <!--&nbsp;&nbsp;Ip绑定:
-    &nbsp;&nbsp;<button onclick="$('#bindIp').toggle()">管理ip绑定</button>-->
-    <!--&nbsp;&nbsp;<button ng-click="getQr()">显示二维码</button>-->
     <table class="table ">
         <thead>
         <tr>
@@ -113,18 +115,18 @@
                 </div>
                 <div class="modal-body" id="json-content">
                     <ul id="bodyTabs" class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active">
+                        <li role="presentation" class="">
                             <a href="#body-req" id="reqBody-tab" role="tab"
                                data-toggle="tab" aria-controls="body-req"
                                aria-expanded="true">Request</a></li>
-                        <li role="presentation" class="">
+                        <li role="presentation" class="active">
                             <a href="#body-res" role="tab" id="resBody-tab"
                                data-toggle="tab" aria-controls="body-res"
                                aria-expanded="false">Response</a></li>
                     </ul>
                     <div id="bodyContent" class="tab-content">
-                        <div role="tabpanel" class="tab-pane fade active in" id="body-req" aria-labelledby="body-tab"></div>
-                        <div role="tabpanel" class="tab-pane fade" id="body-res" aria-labelledby="body-tab"></div>
+                        <div role="tabpanel" class="tab-pane fade padding5" id="body-req" aria-labelledby="body-tab"></div>
+                        <div role="tabpanel" class="tab-pane fade padding5 active in" id="body-res" aria-labelledby="body-tab"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -153,8 +155,8 @@
                                 aria-expanded="false">Response</a></li>
                     </ul>
                     <div id="myTabContent" class="tab-content">
-                        <div role="tabpanel" class="tab-pane fade active in" id="header-req" aria-labelledby="req-tab"></div>
-                        <div role="tabpanel" class="tab-pane fade" id="header-res" aria-labelledby="res-tab"></div>
+                        <div role="tabpanel" class="tab-pane fade padding5 active in" id="header-req" aria-labelledby="req-tab"></div>
+                        <div role="tabpanel" class="tab-pane fade padding5" id="header-res" aria-labelledby="res-tab"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -171,7 +173,7 @@
         var contentType = item.resHeaders["content-type"] || "";
         return {
             isJson : function () {
-                return contentType.indexOf("json") > -1 || contentType.indexOf("javascript") > -1
+                return contentType.indexOf("json") > -1
             },
             isJs : function () {
                 return contentType.indexOf("javascript") > -1
@@ -185,7 +187,7 @@
             getType : function () {
                 return this.isJson() ? "json" :
                         this.isJs() ? "js" :
-                                this.isImage() ? "image" : "html"
+                        this.isImage() ? "image" : "html"
             }
         }
     }
@@ -202,9 +204,22 @@
         }
         return headers;
     }
+    function beautifulBody(body) {
+        var params = body.split(/&/);
+        var result = {};
+        for(var i=0;i<params.length;i++){
+            if(params[i]){
+                var pair = params[i].split("=");
+                result[pair[0]] = pair[1];
+            }
+        }
+        return result;
+    }
+
     function htmlEncode(body) {
         return body.replace(/</gi, "&lt;").replace(/>/gi, "&gt;").replace(/\n/gi, "<br>")
     }
+
     function isEmpty(filter) {
         for(key in filter){
             if(filter[key]){
@@ -221,20 +236,10 @@
         }
     }
 
-    function beautifulBody(body) {
-        var params = body.split(/&/);
-        var result = {};
-        for(var i=0;i<params.length;i++){
-            if(params[i]){
-                var pair = params[i].split("=");
-                result[pair[0]] = pair[1];
-            }
-        }
-        return result;
-    }
     function getHashIp() {
         return /#ip=((\d{1,3}\.){3}\d{1,3})/.test(location.hash) && RegExp.$1;
     }
+
     angular.module('app', [])
             .controller('ctrl', ["$scope", "$http", "$compile",  function($scope, $http, $compile) {
                 $scope.ip = "";
@@ -244,6 +249,10 @@
                 };
                 $scope.bindIps = [];
                 $scope.localIp = "$clientIp$";
+                $scope.data = [];
+                $scope.filterData = [];
+                $scope.start = 0;
+
                 var currentIp;
                 var hashIp = getHashIp();
                 if(hashIp){
@@ -252,9 +261,7 @@
                 if(/[\&\?]id=(.+?)($|&)/.test(location.search)){
                     $scope.id = RegExp.$1;
                 }
-                $scope.data = [];
-                $scope.filterData = [];
-                $scope.start = 0;
+
                 $http.get("/bindIp?action=get").then(function (res) {
                     var data = res.data.data || [];
                     $scope.bindIps = data;
@@ -345,13 +352,13 @@
                         $("#body-res").html('<pre>' + htmlEncode(item.body) + '</pre>');
                     }
 
-                    var body = item.postBody;
+                    var postBody = item.postBody;
                     if(reqContentTypeIsJson(item)){
-                        body = JSON.parse(body);
+                        postBody = JSON.parse(postBody);
                     }else{
-                        body = beautifulBody(body);
+                        postBody = beautifulBody(postBody);
                     }
-                    $("#body-req").JSONView(body);
+                    $("#body-req").JSONView(postBody);
                 }
                 $scope.showHeader = function (item) {
                     $("#header-req").html("");
@@ -389,6 +396,7 @@
                 $scope.clean = function () {
                     $http.get('/cleanCache?ip=' + $scope.ip).then(function (res) {
                         $scope.data = [];
+                        $scope.start = 0;
                     });
                 }
 

@@ -17,14 +17,12 @@ Alex-proxy is an HTTP proxy / HTTP monitor base on and inspired by [TooTallNate/
  * `npm start`
  * set pc/device's proxy with server-ip:8008
  * visit http://server-ip:8008 to view the local http traffic
- * visit http://server-ip:8008?ip=other_device_ip to view the particular device's traffic by binding ip
+ * visit http://server-ip:8008#ip=other_device_ip to view the particular device's traffic by binding ip
  
 # Binding ip
  
- there are two ways to bind other ip to your pc/device, then the binded ip's pc can view your pc/device's http traffic
- 
- * visit http://server-ip:8008 in your pc/device which you want to bind, click "管理ip绑定", type the ip you want to bind in the input, then enter.
- * visit http://server-ip:8008 in your pc/device which you want to be binded, then use the binded pc/device to scan the qrcode which shown in page
+By default pc/device can't access to view other ip's traffic, but you can add the binded ip of which you authorize to access. 
+the way to bind the ip is by like using your mobile to scan the qrcode which shown in page, then you can use your pc to view your mobile's traffic.
  
 # Screenshots 
 
