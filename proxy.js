@@ -12,6 +12,7 @@ var util = require("./alex/util");
 
 var webserver = require("./alex/webserver");
 var trafficdata = require("./alex/trafficdata");
+var hook = require("./alex/hook");
 
 // log levels
 debug.request = require('debug')('proxy ← ← ←');
@@ -78,6 +79,10 @@ var isHopByHop = new RegExp('^(' + hopByHopHeaders.join('|') + ')$', 'i');
 function onrequest(req, res) {
 	// inject for web service
 	if(webserver(req, res)){
+		return;
+	}
+	// hook request
+	if(hook(req, res)){
 		return;
 	}
 

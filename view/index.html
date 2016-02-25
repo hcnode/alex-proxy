@@ -44,6 +44,7 @@
     </div>
     查看请求的ip: &nbsp;<input ng-model="ip" placeholder="为空时为本机ip">
     &nbsp;&nbsp;<button ng-click="clean()" class="btn btn-default btn-xs">清空</button>
+    &nbsp;&nbsp;<button ng-click="go2Hook()" class="btn btn-default btn-xs">Hook</button>
     &nbsp;&nbsp;Filter:
     &nbsp;&nbsp;content-type: <select ng-model="filter.contentType" ng-change="createFilterData()">
         <option value="all">all</option>
@@ -82,6 +83,7 @@
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                             <li><a href="#" ng-click="share(item)" data-toggle="modal" data-target=".common">Share</a></li>
+                            <li><a href="#" ng-click="add2Hook(item)">Add to hook</a></li>
                         </ul>
                     </div>
                 </div>
@@ -399,7 +401,27 @@
                         $scope.start = 0;
                     });
                 }
-
+                $scope.add2Hook = function (item) {
+                    var body = {
+                        header : item.resHeaders,
+                        body : item.body,
+                        method : item.method,
+                        url : item.url,
+                        enable : true
+                    };
+                    $http.post("/hook/add", body).then(function (data) {
+                        if(data.data.code == 400){
+                            alert("hook exist");
+                        }else{
+                            alert("done.")
+                        }
+                    }, function (data) {
+                        alert("done.")
+                    });
+                };
+                $scope.go2Hook = function () {
+                    window.open("/hook");
+                }
                 $scope.getQr();
             }]);
 </script>

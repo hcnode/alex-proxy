@@ -76,6 +76,7 @@ function getLog(req, res) {
 	var urlParse = url.parse(req.url);
 	var pathname = urlParse.pathname;
 	var query = urlParse.query;
+	var method = req.method;
 	var clientIp = util.getIp(req.connection.remoteAddress);
 	if (pathname == "/bindIp") {
 		var ip = getParam(query, "ip");
@@ -133,6 +134,59 @@ function getLog(req, res) {
 		res.end(html.replace(/\$serverIp\$/gi, serverIp).replace(/\$clientIp\$/gi, clientIp)
 			.replace(/\$hostname\$/gi, localHostname).replace(/\$port\$/gi, localPort));
 		return true;
+	}  else if (pathname == "/hook") {
+		res.writeHead(200, {"Content-Type": "text/html"})
+		var html = fs.readFileSync(__dirname + "/../view/hook.html").toString();
+		res.end(html);
+		return true;
+	}  else if (pathname == "/hook/list") {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		var hookFile = __dirname + "/../data/hook.json";
+		var data = JSON.parse(fs.readFileSync(hookFile));
+		res.end(JSON.stringify(data));
+		return true;
+	} else if (pathname == "/hook/add") {
+		hookAction(req, function (exist, data, hookFile, hook) {
+			if(exist){
+				res.end(JSON.stringify({
+					code : 400,
+					message : "data exist"
+				}));
+			}else {
+				data.push(hook);
+				fs.writeFileSync(hookFile, JSON.stringify(data));
+				res.end(JSON.stringify(data));
+			}
+		});
+
+		return true;
+	}  else if (pathname == "/hook/remove") {
+		hookAction(req, function (exist, data, hookFile, hook) {
+			for(var i=0;i<data.length;i++){
+				if(data[i].url == hook.url && data[i].method.toUpperCase() == hook.method.toUpperCase()){
+					data.splice(i, 1);
+					break;
+				}
+			}
+			fs.writeFileSync(hookFile, JSON.stringify(data));
+			res.end(JSON.stringify(data));
+		});
+
+		return true;
+	}   else if (pathname == "/hook/update") {
+		hookAction(req, function (exist, data, hookFile, hook) {
+			if(hook.$$hashKey) delete hook.$$hashKey;
+			for(var i=0;i<data.length;i++){
+				if(data[i].url == hook.url && data[i].method.toUpperCase() == hook.method.toUpperCase()){
+					data[i] = hook;
+					break;
+				}
+			}
+			fs.writeFileSync(hookFile, JSON.stringify(data));
+			res.end(JSON.stringify(data));
+		});
+
+		return true;
 	} else if(pathname == "/cleanCache"){
 		var ip = getParam(query, "ip");
 		var isBindIp = ip ? checkBindIp(clientIp, ip) : true;
@@ -162,6 +216,30 @@ function getVender(req, res) {
 	} else {
 		return false;
 	}
+}
+
+function hookAction(req, cb){
+	var body = '';
+	req.on('data', function (data) {
+		body += data;
+		if (body.length > 1e6)
+			req.connection.destroy();
+	});
+
+	req.on('end', function () {
+		var hook = JSON.parse(body);
+		res.writeHead(200, {"Content-Type": "application/json"});
+		var hookFile = __dirname + "/../data/hook.json";
+		var data = JSON.parse(fs.readFileSync(hookFile));
+		var exist = null;
+		for(var i=0;i<data.length;i++){
+			if(data[i].url == hook.url && data[i].method.toUpperCase() == hook.method.toUpperCase()){
+				exist = data[i];
+				break;
+			}
+		}
+		cb(exist, data, hookFile, hook);
+	});
 }
 module.exports = function (req, res) {
 	if(!localHostname) {

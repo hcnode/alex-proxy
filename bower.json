@@ -33,6 +33,7 @@
     "font-awesome": "font-awsome#~4.5.0",
     "bootstrap": "~3.3.6",
     "jquery-jsonview": "~1.2.3",
-    "qrcodejs" : "git://github.com/davidshimjs/qrcodejs"
+    "qrcodejs": "git://github.com/davidshimjs/qrcodejs",
+    "jsoneditor": "~5.1.2"
   }
 }
