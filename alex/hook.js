@@ -3,24 +3,35 @@
  */
 var url = require('url');
 var fs = require('fs');
-var hookConf;
-function matchHook(reqUrl, method) {
+var util = require("./util");
 
-	var hookFile = __dirname + "/../data/hook.json";
+var hookConf;
+function matchHook(reqUrl, method, clientIp, matchPathOnly) {
+
+	var hookFile = __dirname + "/../data/"+ clientIp +"_hook.json";
+	if(!fs.existsSync(hookFile)) return null;
 	//if(!hookConf){
 		hookConf = JSON.parse(fs.readFileSync(hookFile));
 	//}
 	for(var i=0;i<hookConf.length;i++){
-		if(hookConf[i].url == reqUrl && hookConf[i].method.toUpperCase() == method.toUpperCase()){
+		if(!hookConf[i].matchPathOnly && hookConf[i].url == reqUrl && hookConf[i].method.toUpperCase() == method.toUpperCase()){
+			return hookConf[i];
+		}
+
+		if(hookConf[i].matchPathOnly && getPath(hookConf[i].url) == getPath(reqUrl) && hookConf[i].method.toUpperCase() == method.toUpperCase()){
 			return hookConf[i];
 		}
 	}
 }
 
+function getPath(reqUrl){
+	var urlParse = url.parse(reqUrl);
+	return urlParse.protocol + "//" + urlParse.host + urlParse.pathname;
+}
 module.exports = function (req, res) {
 	var urlParse = url.parse(req.url);
-	var reqUrl = urlParse.protocol + "//" + urlParse.host + urlParse.pathname;
-	var hook = matchHook(reqUrl, req.method);
+	var clientIp = util.getIp(req.connection.remoteAddress);
+	var hook = matchHook(req.url, req.method, clientIp);
 	if(hook && hook.enable){
 		res.writeHead((hook.statusCode || 200) + "", hook.headers);
 

@@ -76,7 +76,6 @@ function getLog(req, res) {
 	var urlParse = url.parse(req.url);
 	var pathname = urlParse.pathname;
 	var query = urlParse.query;
-	var method = req.method;
 	var clientIp = util.getIp(req.connection.remoteAddress);
 	if (pathname == "/bindIp") {
 		var ip = getParam(query, "ip");
@@ -100,12 +99,8 @@ function getLog(req, res) {
 
 			}
 
-			fs.writeFile(ipBindFile, JSON.stringify(json), function (err) {
-				res.writeHead(200, {"Content-Type": "application/json"})
-				res.end(JSON.stringify({
-					code : 200,
-					data : json[clientIp]
-				}));
+			fs.writeFile(ipBindFile, JSON.stringify(json, null, "\t"), function (err) {
+				res.end("<h2>绑定成功!</h2>");
 			});
 		})
 		return true;
@@ -141,12 +136,16 @@ function getLog(req, res) {
 		return true;
 	}  else if (pathname == "/hook/list") {
 		res.writeHead(200, {"Content-Type": "application/json"});
-		var hookFile = __dirname + "/../data/hook.json";
-		var data = JSON.parse(fs.readFileSync(hookFile));
-		res.end(JSON.stringify(data));
+		var hookFile = __dirname + "/../data/"+ getParam(query, "ip") +"_hook.json";
+		if(!fs.existsSync(hookFile)) {
+			res.end(JSON.stringify([]));
+		}else {
+			var data = JSON.parse(fs.readFileSync(hookFile));
+			res.end(JSON.stringify(data));
+		}
 		return true;
 	} else if (pathname == "/hook/add") {
-		hookAction(req, function (exist, data, hookFile, hook) {
+		hookAction(req, res, function (exist, data, hookFile, hook) {
 			if(exist){
 				res.end(JSON.stringify({
 					code : 400,
@@ -154,27 +153,27 @@ function getLog(req, res) {
 				}));
 			}else {
 				data.push(hook);
-				fs.writeFileSync(hookFile, JSON.stringify(data));
+				fs.writeFileSync(hookFile, JSON.stringify(data, null, "\t"));
 				res.end(JSON.stringify(data));
 			}
 		});
 
 		return true;
 	}  else if (pathname == "/hook/remove") {
-		hookAction(req, function (exist, data, hookFile, hook) {
+		hookAction(req, res, function (exist, data, hookFile, hook) {
 			for(var i=0;i<data.length;i++){
 				if(data[i].url == hook.url && data[i].method.toUpperCase() == hook.method.toUpperCase()){
 					data.splice(i, 1);
 					break;
 				}
 			}
-			fs.writeFileSync(hookFile, JSON.stringify(data));
+			fs.writeFileSync(hookFile, JSON.stringify(data, null, "\t"));
 			res.end(JSON.stringify(data));
 		});
 
 		return true;
 	}   else if (pathname == "/hook/update") {
-		hookAction(req, function (exist, data, hookFile, hook) {
+		hookAction(req, res, function (exist, data, hookFile, hook) {
 			if(hook.$$hashKey) delete hook.$$hashKey;
 			for(var i=0;i<data.length;i++){
 				if(data[i].url == hook.url && data[i].method.toUpperCase() == hook.method.toUpperCase()){
@@ -182,10 +181,9 @@ function getLog(req, res) {
 					break;
 				}
 			}
-			fs.writeFileSync(hookFile, JSON.stringify(data));
+			fs.writeFileSync(hookFile, JSON.stringify(data, null, "\t"));
 			res.end(JSON.stringify(data));
 		});
-
 		return true;
 	} else if(pathname == "/cleanCache"){
 		var ip = getParam(query, "ip");
@@ -218,7 +216,9 @@ function getVender(req, res) {
 	}
 }
 
-function hookAction(req, cb){
+function hookAction(req, res, cb){
+	var urlParse = url.parse(req.url);
+	var clientIp = getParam(urlParse.query, "ip");
 	var body = '';
 	req.on('data', function (data) {
 		body += data;
@@ -229,7 +229,10 @@ function hookAction(req, cb){
 	req.on('end', function () {
 		var hook = JSON.parse(body);
 		res.writeHead(200, {"Content-Type": "application/json"});
-		var hookFile = __dirname + "/../data/hook.json";
+		var hookFile = __dirname + "/../data/"+ clientIp +"_hook.json";
+		if(!fs.existsSync(hookFile)){
+			fs.writeFileSync(hookFile, "[]");
+		}
 		var data = JSON.parse(fs.readFileSync(hookFile));
 		var exist = null;
 		for(var i=0;i<data.length;i++){

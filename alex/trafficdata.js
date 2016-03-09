@@ -87,5 +87,8 @@ module.exports = function (req, res, proxyRes, postBody) {
 			id : uuid.v1(),
 			postBody : postBody.join("")
 		});
+		if(cacheData.length > 1000){
+			cacheData.splice(0, cacheData.length - 1000);
+		}
 	});
 }

@@ -8,10 +8,16 @@
     <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/bower_components/jquery-jsonview/dist/jquery.jsonview.js"></script>
     <script src="/bower_components/qrcodejs/qrcode.js"></script>
+    <script src="/bower_components/bootstrap-notify/js/bootstrap-notify.js"></script>
+
 
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="/bower_components/jquery-jsonview/dist/jquery.jsonview.css" />
+
+    <link href="/bower_components/bootstrap-notify/css/bootstrap-notify.css" rel="stylesheet">
+    <link href="/bower_components/bootstrap-notify/css/styles/alert-bangtidy.css" rel="stylesheet">
+    <link href="/bower_components/bootstrap-notify/css/styles/alert-blackgloss.css" rel="stylesheet">
     <style type="text/css">
         .padding5 {
             padding: 5px;
@@ -20,6 +26,7 @@
 
 </head>
 <body ng-app="app" ng-controller="ctrl">
+<div class='notifications top-right'></div>
 <div class="container" style="margin-top: 10px;">
     <div class="row alert alert-info " role="alert">
     <div class="col-xs-9">
@@ -27,10 +34,11 @@
             &nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/hcnode/alex-proxy" target="_blank"><i class="fa fa-github fa-2x"></i></a>
         </h3>
         使用方法：<br>
-        1.将手机网络连接和电脑同一个内网<br>
+        1.将手机网络连接和PC同一个内网<br>
         2.设置手机网络http代理服务器：$serverIp$:$port$<br>
-        3.电脑访问http://$hostname$:$port$/#ip=手机的ip，或者在下面输入框输入ip<br>
-        （查看非本机ip默认是没有权限, 可以使用该手机扫描右边的二维码从而电脑获取该设备http监控权限）
+        3.PC访问http://$hostname$:$port$/<br>
+        4.使用该手机扫描右边的二维码从而PC获取该设备http监控权限<br>
+        5.此页面可自动显示该手机的http请求数据<br>
     </div>
     <div class="col-xs-3 hide" id="bindIp" style="display: none;">
         添加绑定：<input ng-model="bindNewIp" ng-keydown="addBindIp($event)">
@@ -44,7 +52,7 @@
     </div>
     查看请求的ip: &nbsp;<input ng-model="ip" placeholder="为空时为本机ip">
     &nbsp;&nbsp;<button ng-click="clean()" class="btn btn-default btn-xs">清空</button>
-    &nbsp;&nbsp;<button ng-click="go2Hook()" class="btn btn-default btn-xs">Hook</button>
+    &nbsp;&nbsp;<button ng-click="go2Hook()" class="btn btn-default btn-xs">查看Http劫持</button>
     &nbsp;&nbsp;Filter:
     &nbsp;&nbsp;content-type: <select ng-model="filter.contentType" ng-change="createFilterData()">
         <option value="all">all</option>
@@ -82,8 +90,8 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                            <li><a href="#" ng-click="share(item)" data-toggle="modal" data-target=".common">Share</a></li>
-                            <li><a href="#" ng-click="add2Hook(item)">Add to hook</a></li>
+                            <li><a href="#" ng-click="share(item)" data-toggle="modal" data-target=".common">分享</a></li>
+                            <li><a href="#" ng-click="add2Hook(item)">劫持它</a></li>
                         </ul>
                     </div>
                 </div>
@@ -409,20 +417,32 @@
                         url : item.url,
                         enable : true
                     };
-                    $http.post("/hook/add", body).then(function (data) {
+                    $http.post("/hook/add?ip=" + $scope.ip, body).then(function (data) {
                         if(data.data.code == 400){
-                            alert("hook exist");
+                            showMsg("该劫持已存在");
                         }else{
-                            alert("done.")
+                            showMsg("劫持成功,可以在劫持管理修改http返回")
                         }
                     }, function (data) {
-                        alert("done.")
+                        showMsg("劫持成功,可以在劫持管理修改http返回")
                     });
                 };
                 $scope.go2Hook = function () {
-                    window.open("/hook");
+                    if($scope.ip) {
+                        window.open("/hook?ip=" + $scope.ip);
+                    }else{
+                        showMsg("请先输入检测的ip");
+                    }
                 }
                 $scope.getQr();
             }]);
+    function showMsg(msg, type){
+        $('.top-right').notify({
+            message: {
+                text: msg,
+                type: type || "warning"
+            }
+        }).show();
+    }
 </script>
 </html>

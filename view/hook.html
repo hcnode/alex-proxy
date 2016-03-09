@@ -21,21 +21,24 @@
 </head>
 <body ng-app="app" ng-controller="ctrl">
 <div class="container" style="margin-top: 10px;">
+    <h2>劫持管理</h2>
     <button class="btn btn-default" ng-click="add()" data-toggle="modal" data-target="#modal-common">添加</button>
     <table class="table ">
         <thead>
         <tr>
             <th>enable</th>
+            <th>match path only</th>
             <th>method</th>
             <th>url</th>
-            <th></th>
+            <th style="width:270px"></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="item in hooks">
             <td><input type="checkbox" ng-model="item.enable" ng-click="enable($event, item)"></td>
+            <td><input type="checkbox" ng-model="item.matchPathOnly" ng-click="matchPathOnly($event, item)"></td>
             <td>{{ item.method }}</td>
-            <td>{{ item.url }}</td>
+            <td style="word-break:break-all;">{{ item.url }}</td>
             <td>
                 <div class="btn-group" role="group" aria-label="...">
                     <button class="btn btn-default" ng-click="edit(item)" data-toggle="modal" data-target="#modal-common">编辑</button>
@@ -69,7 +72,7 @@
 <script>
     angular.module('app', [])
             .controller('ctrl', ["$scope", "$http", "$compile",  function($scope, $http, $compile) {
-                $http.get("/hook/list").then(function (data) {
+                $http.get("/hook/list" + location.search).then(function (data) {
                     $scope.hooks = data.data;
                 });
                 $scope.edit = function (item) {
@@ -93,12 +96,12 @@
                         return;
                     }
                     if($scope.editObj.isUpdate){
-                        $http.post("/hook/update", body).then(function (data) {
+                        $http.post("/hook/update" + location.search, body).then(function (data) {
                             $scope.hooks = data.data;
                             $("#modal-common").modal("hide");
                         });
                     }else{
-                        $http.post("/hook/add", body).then(function (data) {
+                        $http.post("/hook/add" + location.search, body).then(function (data) {
                             if(data.data.code == 400){
                                 alert("hook已存在")
                             }else {
@@ -113,14 +116,21 @@
                     }
                 }
                 $scope.remove = function (item) {
-                    $http.post("/hook/remove", item).then(function (data) {
+                    $http.post("/hook/remove" + location.search, item).then(function (data) {
                         $scope.hooks = data.data;
                     });
                 }
                 $scope.enable = function ($event, item) {
                     var checkbox = $event.target;
                     item.enable = checkbox.checked;
-                    $http.post("/hook/update", item).then(function (data) {
+                    $http.post("/hook/update" + location.search, item).then(function (data) {
+                        $scope.hooks = data.data;
+                    });
+                }
+                $scope.matchPathOnly = function ($event, item) {
+                    var checkbox = $event.target;
+                    item.matchPathOnly = checkbox.checked;
+                    $http.post("/hook/update" + location.search, item).then(function (data) {
                         $scope.hooks = data.data;
                     });
                 }
