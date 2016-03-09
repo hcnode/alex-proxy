@@ -1,4 +1,4 @@
-Alex-proxy 是一个基于 [TooTallNate/proxy](https://github.com/TooTallNate/proxy) 的node.js的http代理服务器，可以实现移动设备的http代理、监控、劫持.
+Alex-proxy 是一个基于 [TooTallNate/proxy](https://github.com/TooTallNate/proxy) 的node.js的http代理服务器，在它的基础上实现了移动设备的http代理、监控、劫持.
 
 # Features
  
