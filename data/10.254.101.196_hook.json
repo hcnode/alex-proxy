@@ -1,0 +1,54 @@
+[
+	{
+		"header": {
+			"server": "nginx",
+			"date": "Wed, 09 Mar 2016 07:54:56 GMT",
+			"content-length": "0",
+			"connection": "close",
+			"via": "hz-proxy12"
+		},
+		"body": "",
+		"method": "POST",
+		"url": "http://m.analytics.126.net/news/c",
+		"enable": true
+	},
+	{
+		"header": {
+			"server": "Tengine",
+			"date": "Wed, 09 Mar 2016 08:38:15 GMT",
+			"content-type": "application/json; charset=utf-8",
+			"content-length": "336",
+			"connection": "close"
+		},
+		"body": {
+			"S": "Ok",
+			"R": {
+				"country": "中国",
+				"province": "广东",
+				"city": "",
+				"isp": "联通",
+				"X-Forwarded-Ip": "218.107.55.252",
+				"ip": "218.107.55.252",
+				"stat-domain": "s.mi1.cc",
+				"stat-percent": 0.15,
+				"ttl": 3600,
+				"tid": -1,
+				"wifi": {
+					"file.market.xiaomi.com": [
+						"119.188.118.3",
+						"119.188.118.5"
+					]
+				},
+				"wap": {
+					"file.market.xiaomi.com": [
+						"119.188.118.3",
+						"119.188.118.5"
+					]
+				}
+			}
+		},
+		"method": "GET",
+		"url": "http://resolver.gslb.mi-idc.com/gslb/gslb/getbucket.asp?deviceType=0&list=file.market.xiaomi.com&ver=3.0",
+		"enable": true
+	}
+]

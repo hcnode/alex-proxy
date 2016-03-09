@@ -136,7 +136,13 @@ function getLog(req, res) {
 		return true;
 	}  else if (pathname == "/hook/list") {
 		res.writeHead(200, {"Content-Type": "application/json"});
-		var hookFile = __dirname + "/../data/"+ getParam(query, "ip") +"_hook.json";
+		var ip = getParam(query, "ip");
+		var isBindIp = ip ? checkBindIp(clientIp, ip) : false;
+		if(!isBindIp){
+			res.end(JSON.stringify([]));
+			return true;
+		}
+		var hookFile = __dirname + "/../data/"+ ip +"_hook.json";
 		if(!fs.existsSync(hookFile)) {
 			res.end(JSON.stringify([]));
 		}else {
@@ -217,8 +223,14 @@ function getVender(req, res) {
 }
 
 function hookAction(req, res, cb){
+	var clientIp = util.getIp(req.connection.remoteAddress);
 	var urlParse = url.parse(req.url);
-	var clientIp = getParam(urlParse.query, "ip");
+	var ip = getParam(urlParse.query, "ip");
+	var isBindIp = ip ? checkBindIp(clientIp, ip) : false;
+	if(!isBindIp){
+		res.end(JSON.stringify({code:401}));
+		return true;
+	}
 	var body = '';
 	req.on('data', function (data) {
 		body += data;
@@ -229,7 +241,7 @@ function hookAction(req, res, cb){
 	req.on('end', function () {
 		var hook = JSON.parse(body);
 		res.writeHead(200, {"Content-Type": "application/json"});
-		var hookFile = __dirname + "/../data/"+ clientIp +"_hook.json";
+		var hookFile = __dirname + "/../data/"+ ip +"_hook.json";
 		if(!fs.existsSync(hookFile)){
 			fs.writeFileSync(hookFile, "[]");
 		}

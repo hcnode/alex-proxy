@@ -421,10 +421,12 @@
                         if(data.data.code == 400){
                             showMsg("该劫持已存在");
                         }else{
-                            showMsg("劫持成功,可以在劫持管理修改http返回")
+                            if(data.data.length > 0) {
+                                showMsg("劫持成功,可以在劫持管理修改http返回")
+                            }else{
+                                showMsg("没有权限");
+                            }
                         }
-                    }, function (data) {
-                        showMsg("劫持成功,可以在劫持管理修改http返回")
                     });
                 };
                 $scope.go2Hook = function () {

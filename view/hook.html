@@ -92,25 +92,33 @@
                     try {
                         var body = JSON.parse($scope.editObj.content)
                     } catch (e) {
-                        alert("json 解释错误")
+                        showMsg("json 解释错误")
                         return;
                     }
                     if($scope.editObj.isUpdate){
                         $http.post("/hook/update" + location.search, body).then(function (data) {
-                            $scope.hooks = data.data;
-                            $("#modal-common").modal("hide");
+                            if(data.data.length > 0) {
+                                $scope.hooks = data.data;
+                                $("#modal-common").modal("hide");
+                            }else{
+                                showMsg("没权限")
+                            }
                         });
                     }else{
                         $http.post("/hook/add" + location.search, body).then(function (data) {
                             if(data.data.code == 400){
-                                alert("hook已存在")
+                                showMsg("hook已存在")
                             }else {
-                                $scope.hooks = data.data;
-                                $("#modal-common").modal("hide");
+                                if(data.data.length > 0) {
+                                    $scope.hooks = data.data;
+                                    $("#modal-common").modal("hide");
+                                }else{
+                                    showMsg("没权限")
+                                }
                             }
                         }, function (data) {
                             if(data.data.code == 400){
-                                alert("hook已存在")
+                                showMsg("hook已存在")
                             }
                         });
                     }
@@ -135,5 +143,13 @@
                     });
                 }
             }]);
+    function showMsg(msg, type){
+        $('.top-right').notify({
+            message: {
+                text: msg,
+                type: type || "warning"
+            }
+        }).show();
+    }
 </script>
 </html>
